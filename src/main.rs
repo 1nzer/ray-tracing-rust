@@ -2,37 +2,42 @@
 #![allow(unused_variables)]
 extern crate image;
 
+use crate::ray::Ray;
 use crate::vec3::Vec3;
 
 mod ray;
 mod vec3;
 
-
 fn main() {
     let nx = 200;
     let ny = 100;
+
+    let lower_left_corner = Vec3::new(-2.0, -1.0, -1.0);
+    let horizontal = Vec3::new(4.0, 0.0, 0.0);
+    let vertical = Vec3::new(0.0, 2.0, 0.0);
+    let origin = Vec3::new(0.0, 0.0, 0.0);
+
     let mut image_buf = image::ImageBuffer::new(nx, ny);
     for (x, y, pixel) in image_buf.enumerate_pixels_mut() {
-        let r = x as f64 / nx as f64;
-        let g = (ny - y - 1) as f64 / ny as f64;
-        let b = 0.2;
+        let u = x as f64 / nx as f64; // = i / nx
+        let v = (ny - y - 1) as f64 / ny as f64; // = j / ny
 
-        let v = Vec3::new(r, g, b);
+        let r = Ray::new(origin, lower_left_corner + horizontal * u + vertical * v);
 
-        let ir = (255.99 * v.r()) as u8;
-        let ig = (255.99 * v.g()) as u8;
-        let ib = (255.99 * v.b()) as u8;
+        let vec = color(r);
+
+        let ir = (255.99 * vec.r()) as u8;
+        let ig = (255.99 * vec.g()) as u8;
+        let ib = (255.99 * vec.b()) as u8;
 
         *pixel = image::Rgb([ir, ig, ib])
     }
     image_buf.save("./tmp/image.png").unwrap();
-
-    let vec1 = Vec3::new(1., 2., 3.);
-    let vec2 = Vec3::new(3., 2., 1.);
-    let result_vec = vec1 * vec2;
-    println!("{}", result_vec)
 }
 
 fn color(r: ray::Ray) -> Vec3 {
-    Vec3::new(1., 2., 3.)
+    let v = r.direction();
+    let unit_direction = v.unit_vector();
+    let t = 0.5 * (unit_direction.y() + 1.0);
+    Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
 }

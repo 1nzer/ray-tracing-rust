@@ -2,7 +2,7 @@
 
 use std::fmt;
 use std::fmt::{Display, Formatter};
-use std::ops::{Add, Mul, Sub};
+use std::ops::{Add, Mul, Sub, Div};
 
 #[derive(Copy, Clone)]
 pub struct Vec3 {
@@ -36,7 +36,15 @@ impl Vec3 {
         self.e[2]
     }
 
-    pub fn unit_vector(&self) -> Self {
+    pub fn length(&self) -> f64 {
+        (self.e[0] * self.e[0] + self.e[1] * self.e[1] + self.e[2] * self.e[2]).sqrt()
+    }
+
+    pub fn squared_length(&self) -> f64 {
+        self.e[0] * self.e[0] + self.e[1] * self.e[1] + self.e[2] * self.e[2]
+    }
+
+    pub fn make_unit_vector(&self) -> Self {
         let k = 1.0 / (self.e[0] * self.e[0] + self.e[1] * self.e[1] + self.e[2]* self.e[2]).sqrt();
         Self::new(self.e[0] * k, self.e[1] * k, self.e[2] * k)
     }
@@ -44,8 +52,11 @@ impl Vec3 {
     pub fn dot(&self, rhs: Self) -> f64 {
         self.e[0] * rhs.e[0] + self.e[1] * rhs.e[1] + self.e[2] * rhs.e[2]
     }
-}
 
+    pub fn unit_vector(self) -> Self {
+        self/self.length()
+    }
+ }
 
 impl Add<Vec3> for Vec3 {
     type Output = Self;
@@ -94,6 +105,22 @@ impl Mul<f64> for Vec3 {
 
     fn mul(self, rhs: f64) -> Self::Output {
         Self::new(self.e[0] * rhs, self.e[1] * rhs, self.e[2] * rhs)
+    }
+}
+
+impl Div<Vec3> for Vec3 {
+    type Output = Self;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        Self::new(self.e[0] / rhs.e[0], self.e[1] / rhs.e[1], self.e[2] / rhs.e[2])
+    }
+}
+
+impl Div<f64> for Vec3 {
+    type Output = Self;
+
+    fn div(self, rhs: f64) -> Self::Output {
+        Self::new(self.e[0] / rhs, self.e[1] / rhs, self.e[2] / rhs)
     }
 }
 
