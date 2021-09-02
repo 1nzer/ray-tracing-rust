@@ -1,3 +1,9 @@
+#![allow(dead_code)]
+#![allow(unused_variables)]
+
+mod vec3;
+mod ray;
+
 extern crate image;
 
 fn main() {
@@ -15,4 +21,13 @@ fn main() {
         *pixel = image::Rgb([ir, ig, ib])
     }
     image_buf.save("./tmp/image.png").unwrap();
+
+    let vec1 = vec3::Vec3::new(1.,2.,3.);
+    let vec2 = vec3::Vec3::new(3.,2., 1.);
+    let result_vec = vec1 * vec2;
+    println!("{}", result_vec)
+}
+
+fn color(r: ray::Ray) -> vec3::Vec3 {
+    vec3::Vec3::new(1.,2.,3.)
 }
