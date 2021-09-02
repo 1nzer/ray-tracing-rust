@@ -10,9 +10,9 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
-    pub fn new(a: f64, b: f64, c: f64) -> Self {
+    pub fn new(e0: f64, e1: f64, e2: f64) -> Self {
         Self {
-            e: [a, b, c]
+            e: [e0, e1, e2]
         }
     }
 
