@@ -2,7 +2,7 @@
 
 use std::fmt;
 use std::fmt::{Display, Formatter};
-use std::ops::{Add, Mul, Sub, Div};
+use std::ops::{Add, Div, Mul, Sub};
 
 #[derive(Copy, Clone)]
 pub struct Vec3 {
@@ -45,7 +45,7 @@ impl Vec3 {
     }
 
     pub fn make_unit_vector(&self) -> Self {
-        let k = 1.0 / (self.e[0] * self.e[0] + self.e[1] * self.e[1] + self.e[2]* self.e[2]).sqrt();
+        let k = 1.0 / self.length();
         Self::new(self.e[0] * k, self.e[1] * k, self.e[2] * k)
     }
 
@@ -54,9 +54,9 @@ impl Vec3 {
     }
 
     pub fn unit_vector(self) -> Self {
-        self/self.length()
+        self / self.length()
     }
- }
+}
 
 impl Add<Vec3> for Vec3 {
     type Output = Self;
