@@ -2,44 +2,55 @@
 #![allow(unused_variables)]
 extern crate image;
 
+use rand::Rng;
+
+use crate::camera::Camera;
 use crate::hittable::Hittable;
 use crate::hittable_list::HittableList;
 use crate::ray::Ray;
 use crate::sphere::Sphere;
 use crate::vec3::Vec3;
 
-mod ray;
-mod vec3;
+mod camera;
 mod hittable;
-mod sphere;
 mod hittable_list;
+mod ray;
+mod sphere;
+mod vec3;
 
 fn main() {
-    let nx = 200 * 5;
-    let ny = 100 * 5;
+    let nx = 200;
+    let ny = 100;
+    let ns = 100;
 
-    let lower_left_corner = Vec3::new(-2.0, -1.0, -1.0);
-    let horizontal = Vec3::new(4.0, 0.0, 0.0);
-    let vertical = Vec3::new(0.0, 2.0, 0.0);
-    let origin = Vec3::new(0.0, 0.0, 0.0);
+    let mut rng = rand::thread_rng();
 
     let world = HittableList::new(vec![
-        Box::new(Sphere ::new(0.0, 0.0, -1.0, 0.5)),
-        Box::new(Sphere ::new(0.0, -100.5, -1.0, 100.0)),
+        Box::new(Sphere::new(0.0, 0.0, -1.0, 0.5)),
+        Box::new(Sphere::new(0.0, -100.5, -1.0, 100.0)),
     ]);
+
+    let cam = Camera::new();
 
     let mut image_buf = image::ImageBuffer::new(nx, ny);
     for (x, y, pixel) in image_buf.enumerate_pixels_mut() {
-        let u = x as f64 / nx as f64; // = i / nx
-        let v = (ny - y - 1) as f64 / ny as f64; // = j / ny
-        let r = Ray::new(origin, lower_left_corner + horizontal * u + vertical * v);
+        let i = x as f64;
+        let j = (ny - y - 1) as f64;
 
-        let p = r.point_at_parameter(2.0);
-        let vec = color(r, &world);
+        let mut col = Vec3::new(0.0, 0.0, 0.0);
+        for s in 0..ns {
+            let u = (i + rng.gen::<f64>()) / nx as f64;
+            let v = (j + rng.gen::<f64>()) / ny as f64;
 
-        let ir = (255.99 * vec.r()) as u8;
-        let ig = (255.99 * vec.g()) as u8;
-        let ib = (255.99 * vec.b()) as u8;
+            let r = cam.get_ray(u, v);
+            let p = r.point_at_parameter(2.0);
+            col = color(r, &world) + col;
+        }
+
+        col = col / ns as f64;
+        let ir = (255.99 * col.e[0]) as u8;
+        let ig = (255.99 * col.e[1]) as u8;
+        let ib = (255.99 * col.e[2]) as u8;
 
         *pixel = image::Rgb([ir, ig, ib])
     }
