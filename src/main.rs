@@ -23,13 +23,10 @@ fn main() {
     let vertical = Vec3::new(0.0, 2.0, 0.0);
     let origin = Vec3::new(0.0, 0.0, 0.0);
 
-    let world = HittableList {
-        list_size: 2,
-        list: vec![
-            Box::new(Sphere { center: Vec3::new(0.0, 0.0, -1.0), radius: 0.5 }),
-            Box::new(Sphere { center: Vec3::new(0.0, -100.5, -1.0), radius: 100.0 }),
-        ],
-    };
+    let world = HittableList::new(vec![
+        Box::new(Sphere ::new(0.0, 0.0, -1.0, 0.5)),
+        Box::new(Sphere ::new(0.0, -100.5, -1.0, 100.0)),
+    ]);
 
     let mut image_buf = image::ImageBuffer::new(nx, ny);
     for (x, y, pixel) in image_buf.enumerate_pixels_mut() {

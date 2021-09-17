@@ -17,25 +17,28 @@ impl Hittable for Sphere {
         if discriminant > 0 as f64 {
             let temp = (-b - (b * b - a * c).sqrt()) / a;
             if temp < t_max && temp > t_min {
-                let pap = r.point_at_parameter(temp);
-                let rec = HitRecord {
-                    t: temp,
-                    p: pap,
-                    normal: (pap - self.center) / self.radius
-                };
-                return Option::Some(rec);
+                return self.get_hit_record(temp, r);
             }
             let temp = (-b + (b * b - a * c).sqrt()) / a;
             if temp < t_max && temp > t_min {
-                let pap = r.point_at_parameter(temp);
-                let rec = HitRecord {
-                    t: temp,
-                    p: pap,
-                    normal: (pap - self.center) / self.radius
-                };
-                return Option::Some(rec);
+                return self.get_hit_record(temp, r);
             }
         }
         return Option::None
+    }
+}
+
+impl Sphere {
+    pub fn new(x: f64, y: f64, z: f64, r: f64) -> Self {
+        Self {
+            center: Vec3::new(x, y, z),
+            radius: r,
+        }
+    }
+
+    fn get_hit_record(&self, t: f64, r: &Ray) -> Option<HitRecord> {
+        let pap = r.point_at_parameter(t);
+        let rec = HitRecord::new_from_vec(t, pap, (pap - self.center) / self.radius);
+        return Option::Some(rec);
     }
 }
