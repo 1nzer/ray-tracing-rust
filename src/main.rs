@@ -7,6 +7,7 @@ use rand::Rng;
 use crate::camera::Camera;
 use crate::hittable::Hittable;
 use crate::hittable_list::HittableList;
+use crate::material::{Lambertian, Metal};
 use crate::ray::Ray;
 use crate::sphere::Sphere;
 use crate::vec3::Vec3;
@@ -17,6 +18,7 @@ mod hittable_list;
 mod ray;
 mod sphere;
 mod vec3;
+mod material;
 
 fn main() {
     let nx = 200;
@@ -26,8 +28,10 @@ fn main() {
     let mut rng = rand::thread_rng();
 
     let world = HittableList::new(vec![
-        Box::new(Sphere::new(0.0, 0.0, -1.0, 0.5)),
-        Box::new(Sphere::new(0.0, -100.5, -1.0, 100.0)),
+        Box::new(Sphere::new(0.0, 0.0, -1.0, 0.5, Lambertian::new(0.8, 0.3, 0.3))),
+        Box::new(Sphere::new(0.0, -100.5, -1.0, 100.0, Lambertian::new(0.8, 0.8, 0.0))),
+        Box::new(Sphere::new(1.0, 0.0, -1.0, 0.5, Metal::new(0.8, 0.6, 0.2, 1.0))),
+        Box::new(Sphere::new(-1.0, 0.0, -1.0, 0.5, Metal::new(0.8, 0.8, 0.8, 0.3))),
     ]);
 
     let cam = Camera::new();
@@ -44,7 +48,7 @@ fn main() {
 
             let r = cam.get_ray(u, v);
             let p = r.point_at_parameter(2.0);
-            col = color(r, &world) + col;
+            col = color(r, &world, 0) + col;
         }
 
         col = col / ns as f64;
@@ -57,12 +61,15 @@ fn main() {
     image_buf.save("./tmp/image.png").unwrap();
 }
 
-fn color<T: Hittable>(r: Ray, world: &T) -> Vec3 {
+fn color<T: Hittable>(r: Ray, world: &T, depth: i32) -> Vec3 {
     let hit_record_option = world.hit(&r, 0.001, f64::MAX);
     return match hit_record_option {
         Some(rec) => {
-            let target = rec.p + rec.normal + random_in_unit_sphere();
-            color(Ray::new(rec.p, target - rec.p), world) * 0.5
+            let (attenuation, scattered, scatter) = rec.material.scatter(r, &rec);
+            if depth < 50 && scatter {
+                return attenuation * color(scattered, world, depth + 1);
+            }
+            return Vec3::new(0.0, 0.0, 0.0);
         }
         _ => {
             let unit_direction = r.direction().unit_vector();
