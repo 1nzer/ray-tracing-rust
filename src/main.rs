@@ -7,7 +7,7 @@ use rand::Rng;
 use crate::camera::Camera;
 use crate::hittable::Hittable;
 use crate::hittable_list::HittableList;
-use crate::material::{Lambertian, Metal};
+use crate::material::{Lambertian, Metal, Dielectric};
 use crate::ray::Ray;
 use crate::sphere::Sphere;
 use crate::vec3::Vec3;
@@ -28,10 +28,11 @@ fn main() {
     let mut rng = rand::thread_rng();
 
     let world = HittableList::new(vec![
-        Box::new(Sphere::new(0.0, 0.0, -1.0, 0.5, Lambertian::new(0.8, 0.3, 0.3))),
+        Box::new(Sphere::new(0.0, 0.0, -1.0, 0.5, Lambertian::new(0.1, 0.2, 0.5))),
         Box::new(Sphere::new(0.0, -100.5, -1.0, 100.0, Lambertian::new(0.8, 0.8, 0.0))),
-        Box::new(Sphere::new(1.0, 0.0, -1.0, 0.5, Metal::new(0.8, 0.6, 0.2, 1.0))),
-        Box::new(Sphere::new(-1.0, 0.0, -1.0, 0.5, Metal::new(0.8, 0.8, 0.8, 0.3))),
+        Box::new(Sphere::new(1.0, 0.0, -1.0, 0.5, Metal::new(0.8, 0.6, 0.2, 0.0))),
+        Box::new(Sphere::new(-1.0, 0.0, -1.0, 0.5, Dielectric::new(1.5))),
+        Box::new(Sphere::new(-1.0, 0.0, -1.0, -0.45, Dielectric::new(1.5))),
     ]);
 
     let cam = Camera::new();
