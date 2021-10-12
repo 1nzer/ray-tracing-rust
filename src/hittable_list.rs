@@ -2,7 +2,6 @@ use crate::hittable::{HitRecord, Hittable};
 use crate::ray::Ray;
 
 pub struct HittableList {
-    pub list_size: usize,
     pub list: Vec<Box<dyn Hittable>>,
 }
 
@@ -27,7 +26,6 @@ impl Hittable for HittableList {
 impl HittableList {
     pub fn new(list: Vec<Box<dyn Hittable>>) -> Self {
         Self {
-            list_size: list.len(),
             list,
         }
     }
