@@ -53,6 +53,14 @@ impl Vec3 {
         self.e[0] * rhs.e[0] + self.e[1] * rhs.e[1] + self.e[2] * rhs.e[2]
     }
 
+    pub fn cross(v1: Vec3, v2: Vec3) -> Vec3 {
+        Vec3::new(
+            v1.e[1]*v2.e[2] - v1.e[2]*v2.e[1],
+            -(v1.e[0]*v2.e[2] - v1.e[2]*v2.e[0]),
+            v1.e[0]*v2.e[1] - v1.e[1]*v2.e[0]
+        )
+    }
+
     pub fn unit_vector(self) -> Self {
         self / self.length()
     }

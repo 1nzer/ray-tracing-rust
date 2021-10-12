@@ -2,12 +2,14 @@
 #![allow(unused_variables)]
 extern crate image;
 
+use std::f64::consts::PI;
+
 use rand::Rng;
 
 use crate::camera::Camera;
 use crate::hittable::Hittable;
 use crate::hittable_list::HittableList;
-use crate::material::{Lambertian, Metal, Dielectric};
+use crate::material::{Dielectric, Lambertian, Metal};
 use crate::ray::Ray;
 use crate::sphere::Sphere;
 use crate::vec3::Vec3;
@@ -35,7 +37,13 @@ fn main() {
         Box::new(Sphere::new(-1.0, 0.0, -1.0, -0.45, Dielectric::new(1.5))),
     ]);
 
-    let cam = Camera::new();
+    let cam = Camera::new(
+        Vec3::new(-2.0, 2.0, 1.0),
+        Vec3::new(0.0, 0.0, -1.0),
+        Vec3::new(0.0, 1.0, 0.0),
+        90.0,
+        nx as f64 / ny as f64,
+    );
 
     let mut image_buf = image::ImageBuffer::new(nx, ny);
     for (x, y, pixel) in image_buf.enumerate_pixels_mut() {
