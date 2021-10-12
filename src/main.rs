@@ -2,8 +2,6 @@
 #![allow(unused_variables)]
 extern crate image;
 
-use std::f64::consts::PI;
-
 use rand::Rng;
 
 use crate::camera::Camera;
@@ -37,12 +35,18 @@ fn main() {
         Box::new(Sphere::new(-1.0, 0.0, -1.0, -0.45, Dielectric::new(1.5))),
     ]);
 
+    let look_from = Vec3::new(3.0, 3.0, 2.0);
+    let look_at = Vec3::new(0.0, 0.0, -1.0);
+    let dist_to_focus = (look_from - look_at).length();
+    let aperture = 2.0;
     let cam = Camera::new(
-        Vec3::new(-2.0, 2.0, 1.0),
-        Vec3::new(0.0, 0.0, -1.0),
+        look_from,
+        look_at,
         Vec3::new(0.0, 1.0, 0.0),
-        90.0,
+        20.0,
         nx as f64 / ny as f64,
+        aperture,
+        dist_to_focus,
     );
 
     let mut image_buf = image::ImageBuffer::new(nx, ny);
