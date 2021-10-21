@@ -2,7 +2,10 @@
 #![allow(unused_variables)]
 extern crate image;
 
+use std::time::Instant;
+
 use rand::Rng;
+use rayon::prelude::*;
 
 use crate::camera::Camera;
 use crate::hittable::Hittable;
@@ -21,11 +24,12 @@ mod vec3;
 mod material;
 
 fn main() {
+    let now = Instant::now();
+
     let nx = 200;
     let ny = 100;
-    let ns = 100;
+    let ns = 10; // best 100
 
-    let mut rng = rand::thread_rng();
 
     let world = random_scene();
 
@@ -43,29 +47,41 @@ fn main() {
         dist_to_focus,
     );
 
+    let image =
+        (0..ny).into_par_iter().rev()
+            .flat_map(|y| {
+                (0..nx).flat_map(|x| {
+                    let mut col = Vec3::new(0.0, 0.0, 0.0);
+                    let mut rng = rand::thread_rng();
+                    for s in 0..ns {
+                        let u = (x as f64 + rng.gen::<f64>()) / nx as f64;
+                        let v = (y as f64 + rng.gen::<f64>()) / ny as f64;
+
+                        let r = cam.get_ray(u, v);
+                        let p = r.point_at_parameter(2.0);
+                        col = color(r, &world, 0) + col;
+                    }
+
+                    col = col / ns as f64;
+                    let ir = (255.99 * col.e[0].sqrt()) as u8;
+                    let ig = (255.99 * col.e[1].sqrt()) as u8;
+                    let ib = (255.99 * col.e[2].sqrt()) as u8;
+                    vec![ir, ig, ib]
+                }).collect::<Vec<u8>>()
+            }).collect::<Vec<u8>>();
+
+
     let mut image_buf = image::ImageBuffer::new(nx, ny);
     for (x, y, pixel) in image_buf.enumerate_pixels_mut() {
-        let i = x as f64;
-        let j = (ny - y - 1) as f64;
-
-        let mut col = Vec3::new(0.0, 0.0, 0.0);
-        for s in 0..ns {
-            let u = (i + rng.gen::<f64>()) / nx as f64;
-            let v = (j + rng.gen::<f64>()) / ny as f64;
-
-            let r = cam.get_ray(u, v);
-            let p = r.point_at_parameter(2.0);
-            col = color(r, &world, 0) + col;
-        }
-
-        col = col / ns as f64;
-        let ir = (255.99 * col.e[0].sqrt()) as u8;
-        let ig = (255.99 * col.e[1].sqrt()) as u8;
-        let ib = (255.99 * col.e[2].sqrt()) as u8;
-
+        let pivot: usize = (nx * y * 3 + x * 3) as usize;
+        let ir = image[pivot + 0];
+        let ig = image[pivot + 1];
+        let ib = image[pivot + 2];
         *pixel = image::Rgb([ir, ig, ib])
     }
     image_buf.save("./tmp/image.png").unwrap();
+
+    println!("Rendering time: {:.2} min", now.elapsed().as_secs() as f64 / 60.0);
 }
 
 fn color<T: Hittable>(r: Ray, world: &T, depth: i32) -> Vec3 {

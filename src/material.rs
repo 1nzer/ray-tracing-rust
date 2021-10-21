@@ -5,7 +5,7 @@ use crate::random_in_unit_sphere;
 use crate::ray::Ray;
 use crate::vec3::Vec3;
 
-pub trait Material {
+pub trait Material: Sync {
     fn scatter(&self, r_in: Ray, rec: &HitRecord) -> (Vec3, Ray, bool); // attenuation, scattered, scatter
 }
 
